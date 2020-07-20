@@ -114,26 +114,22 @@ public class Music extends RESTService {
     JSONObject song_JSON = (JSONObject) JSONValue.parse(song);
 
 
+ 
+    String songTitle = (String) song_JSON.get("title"); 
 
-
-     
-    // service method invocations
-
-     
-
-
-
-
-    // postResponse
-    boolean postResponse_condition = true;
-    if(postResponse_condition) {
-      JSONObject postResult = new JSONObject();
-
-      
-
-      return Response.status(HttpURLConnection.HTTP_OK).entity(postResult.toJSONString()).build();
+    Connection connection; 
+    try { 
+        connection = dbm.getConnection(); 
+         
+        PreparedStatement statement = connection.prepareStatement("INSTER INTO songs (title) VALUES (?);"); 
+        statement.setString(1, songTitle); 
+        statement.executeUpdate(); 
+        statement.close();
+        return Response.status(HttpURLConnection.HTTP_OK).build();
+    } catch(SQLException e) { 
+        return Response.serverError().build();
     }
-    return null;
+    
   }
 
   /**
@@ -158,25 +154,25 @@ public class Music extends RESTService {
 
 
 
-
+    Connection connection; 
+    try { 
+        connection = dbm.getConnection(); 
      
-    // service method invocations
-
-     
-
-
-
-
-    // getResponse
-    boolean getResponse_condition = true;
-    if(getResponse_condition) {
-      JSONObject getResult = new JSONObject();
-
-      
-
-      return Response.status(HttpURLConnection.HTTP_OK).entity(getResult.toJSONString()).build();
+        PreparedStatement statement = connection.prepareStatement("SELECT * FROM songs;"); 
+        ResultSet results = statement.executeQuery();  
+        JSONArray json = new JSONArray();
+        while(results.next()) { 
+            String songTitle = results.getString("title");  
+            JSONObject songJson = new JSONObject(); 
+            songJson.put("title", songTitle);
+            json.add(songJson);
+        } 
+        return Response.status(200).entity(json.toJSONString()).build();
+    } catch (SQLException e) { 
+        return Response.serverError().build();
     }
-    return null;
+     
+    
   }
 
 
